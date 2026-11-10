@@ -925,3 +925,7 @@ footer { background: var(--dark); color: #eee; padding: var(--space-5) var(--pad
   .signup p, .legal, .social { text-align: center; justify-content: center; }
   .hero-ui { left: 20px; bottom: 24px; }
 }
+@media (max-width: 520px) {
+  .offices { grid-template-columns: 1fr; }
+  .legal { flex-direction: column; gap: 18px; }
+}
