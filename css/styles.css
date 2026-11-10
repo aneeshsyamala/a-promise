@@ -91,16 +91,24 @@ header.hide-nav:has(#projects, #articles, #days) .logo {
   pointer-events: none;
 }
 nav { display: flex; gap: 32px; }
-header nav { justify-content: center; flex-wrap: wrap; }
+header #nav { justify-content: center; flex-wrap: wrap; }
 .projects, .articles, .days {
   display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
+  justify-content: safe center;
+  flex-wrap: nowrap;
   gap: 8px 18px;
-  max-width: 880px;
-  padding-bottom: 8px;
+  width: 100%;
+  max-width: none;
+  padding: 0 16px 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
 }
+.projects::-webkit-scrollbar,
+.articles::-webkit-scrollbar,
+.days::-webkit-scrollbar { display: none; }
 .projects a, .articles a, .days a {
+  flex: none;
+  white-space: nowrap;
   font-size: 12px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -887,21 +895,23 @@ footer { background: var(--dark); color: #eee; padding: var(--space-5) var(--pad
     --space-5: 88px;
     --space-6: 148px;
   }
-  .menu { display: block; position: absolute; top: 18px; right: 20px; }
-  header.hide-nav .menu { opacity: 0; pointer-events: none; }
+  header { padding: 14px 16px 10px; }
+  .menu { display: none; }
   header #nav {
-    max-height: none;
-    display: none;
-    position: absolute;
-    top: 100%; left: 0; right: 0;
-    flex-direction: column;
+    display: flex;
+    position: static;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
     align-items: center;
-    gap: 18px;
-    padding: 20px 36px 28px;
-    background: #fff;
-    color: #000;
+    gap: 8px 14px;
+    max-height: none;
+    overflow: visible;
+    padding: 0 0 8px;
+    background: transparent;
+    color: inherit;
   }
-  header.open #nav { display: flex; }
+  header #nav a { font-size: 12px; letter-spacing: 0.06em; }
   .statement, .journal-head, .feature, .foot-top, .legal, .j-hero, .j-grid, .day-head, .day-people, .life-top, .life-meta, .life-qa article { grid-template-columns: 1fr; }
   .day-people a:nth-child(2) { margin-top: 0; }
   .work, .case-pair, .split, .quotes, .about-hero, .moment, .svc, .belief-grid, .facts div, .people, .clients div, .contact-top, .positions { grid-template-columns: 1fr; }

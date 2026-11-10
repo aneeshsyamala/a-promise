@@ -101,6 +101,14 @@ document.querySelectorAll("header #nav a").forEach((link) => {
   if (link.getAttribute("href") === section) link.classList.add("is-current");
 });
 
+const showCurrent = (nav) => {
+  const current = nav.querySelector(".is-current");
+  if (!current) return;
+  const navBox = nav.getBoundingClientRect();
+  const item = current.getBoundingClientRect();
+  nav.scrollLeft += item.left - navBox.left - (navBox.width - item.width) / 2;
+};
+
 const projectNav = document.querySelector("#projects");
 if (projectNav) {
   const id = new URLSearchParams(location.search).get("p") || "repsol";
@@ -120,6 +128,7 @@ if (projectNav) {
   if (kicker) kicker.textContent = `${project.name} · ${project.sector}`;
   if (title) title.textContent = project.title;
   document.title = `${project.name} — A PROMISE`;
+  showCurrent(projectNav);
 }
 
 const articles = [
@@ -186,6 +195,7 @@ if (articleNav) {
     return p;
   }));
   document.title = `${article.title} — A PROMISE`;
+  showCurrent(articleNav);
 }
 
 const days = [
@@ -292,6 +302,7 @@ if (life) {
       }
       dayNav.appendChild(link);
     });
+    showCurrent(dayNav);
   }
 }
 
