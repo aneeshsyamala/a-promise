@@ -12,11 +12,11 @@ const projects = [
 ];
 
 const slides = [
-  { id: "repsol", name: "Northline", sector: "Energy & Industrial", image: "images/home-hero.png" },
-  { id: "meta", name: "Lumen", sector: "Technology", image: "images/home-hero.png" },
-  { id: "va", name: "Atelier", sector: "Culture", image: "images/home-hero.png" },
-  { id: "amazon", name: "Brightline", sector: "Technology", image: "images/home-hero.png" },
-  { id: "youtube", name: "Fieldcast", sector: "Technology", image: "images/home-hero.png" }
+  { id: "repsol", name: "Northline", sector: "Energy & Industrial", image: "images/home-hero.png?v=2" },
+  { id: "meta", name: "Lumen", sector: "Technology", image: "images/home-hero.png?v=2" },
+  { id: "va", name: "Atelier", sector: "Culture", image: "images/home-hero.png?v=2" },
+  { id: "amazon", name: "Brightline", sector: "Technology", image: "images/home-hero.png?v=2" },
+  { id: "youtube", name: "Fieldcast", sector: "Technology", image: "images/home-hero.png?v=2" }
 ];
 
 const slideRoot = document.querySelector("#slides");
@@ -43,6 +43,57 @@ function show(index) {
   if (client) client.textContent = slide.name;
   if (sector) sector.textContent = slide.sector;
   if (view) view.href = `work.html?p=${slide.id}`;
+}
+
+const places = document.querySelector("#places");
+if (places) {
+  const words = ["Name", "Social", "Campaign", "Website", "App", "Product", "Packaging", "Store", "Space", "People", "Service", "Support"];
+  let index = 0;
+  let flipping = false;
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const sizer = places.querySelector(".place-sizer");
+  const face = places.querySelector(".place");
+  const motion = "width 0.55s cubic-bezier(0.32, 0.72, 0, 1)";
+
+  setInterval(() => {
+    if (flipping) return;
+    const word = words[index = (index + 1) % words.length];
+    if (reduce) {
+      sizer.textContent = word;
+      face.textContent = word;
+      return;
+    }
+    const from = face.getBoundingClientRect().width;
+    const incoming = document.createElement("span");
+    incoming.className = "place place-in";
+    incoming.setAttribute("aria-hidden", "true");
+    incoming.textContent = word;
+    places.append(incoming);
+    sizer.textContent = word;
+    const to = incoming.getBoundingClientRect().width;
+    places.style.transition = "none";
+    places.style.width = from + "px";
+    void places.offsetWidth;
+    flipping = true;
+    places.style.transition = motion;
+    face.classList.add("place-out");
+    incoming.classList.remove("place-in");
+    places.style.width = to + "px";
+    const finish = () => {
+      if (!flipping) return;
+      flipping = false;
+      face.style.transition = "none";
+      face.classList.remove("place-out");
+      face.textContent = word;
+      incoming.remove();
+      places.style.transition = "none";
+      places.style.width = face.getBoundingClientRect().width + "px";
+      void face.offsetWidth;
+      face.style.transition = "";
+    };
+    incoming.addEventListener("transitionend", finish);
+    window.setTimeout(finish, 700);
+  }, 2400);
 }
 
 if (slideRoot) {
@@ -75,11 +126,18 @@ document.querySelectorAll(".shot").forEach((shot) => {
 
 const header = document.querySelector("#header");
 let lastY = window.scrollY;
+const home = document.querySelector(".statement");
 const onScroll = () => {
   const hero = document.querySelector(".hero");
   const y = window.scrollY;
-  header.classList.toggle("solid", !hero || y > hero.offsetHeight - 40);
-  if ((hero || document.querySelector("#projects, #articles, #days")) && !header.classList.contains("open")) {
+  let overHero = false;
+  if (hero && !home) {
+    const rect = hero.getBoundingClientRect();
+    overHero = rect.top < header.offsetHeight && rect.bottom > 48;
+  }
+  header.classList.toggle("solid", !overHero);
+  header.classList.toggle("edge", header.classList.contains("solid") && y > 8);
+  if ((home || hero || document.querySelector("#projects, #articles, #days")) && !header.classList.contains("open")) {
     const delta = y - lastY;
     if (y < 8) header.classList.remove("hide-nav");
     else if (delta > 4) header.classList.add("hide-nav");
@@ -136,8 +194,8 @@ const articles = [
     id: "presence",
     name: "Presence",
     category: "News",
-    read: "2 min read",
-    date: "14 October 2026",
+    read: "1 min read",
+    date: "14 Oct 2026",
     title: "A distinctive presence, designed for connection.",
     body: [
       "A brand is only as strong as the way it shows up. A clear presence helps people recognise you, trust you, and find their way in.",
@@ -148,8 +206,8 @@ const articles = [
     id: "budapest",
     name: "Studio notes",
     category: "Events",
-    read: "Less than a min read",
-    date: "25 September 2026",
+    read: "1 min read",
+    date: "25 Sep 2026",
     title: "Studio notes 2026",
     body: [
       "A short note from a 2026 gathering: the room, the conversations, and what we took back to the studio.",
@@ -160,8 +218,8 @@ const articles = [
     id: "zara",
     name: "Marlow",
     category: "Insights",
-    read: "5 min read",
-    date: "21 July 2026",
+    read: "1 min read",
+    date: "21 Jul 2026",
     title: "Marlow’s experience evolution",
     body: [
       "A retail experience changes when the brand promise is carried from the window, to the fitting room, to the way you leave.",
@@ -205,7 +263,7 @@ const days = [
     role: "Brand strategist",
     place: "Bangalore",
     langs: "EN, ML",
-    image: "images/about-person.png",
+    image: "images/about-person.png?v=2",
     line: "A strategist finds the promise, then keeps every choice pointed at it.",
     bio: "Mira works from the Bangalore studio. Most days she is with a client, or back at the desk turning that conversation into a line the rest of the team can use.",
     quote: "If it looks right and says the wrong thing, it goes back.",
@@ -222,7 +280,7 @@ const days = [
     role: "Design director",
     place: "Trivandrum",
     langs: "EN, ML",
-    image: "images/about-a.png",
+    image: "images/about-a.png?v=2",
     line: "Design is how a promise is recognised before anyone reads a word.",
     bio: "Arun leads design from the Trivandrum studio. He spends the day between sketches, critique, and the moment a client sees the work for the first time.",
     quote: "Show the choice, and why it still feels like them.",
@@ -239,7 +297,7 @@ const days = [
     role: "Programme lead",
     place: "Bangalore",
     langs: "EN, HI",
-    image: "images/about-c.png",
+    image: "images/about-c.png?v=2",
     line: "A programme lead keeps the promise moving, from the first meeting to the last file.",
     bio: "Leela works across both studios. Her day is the plan: who needs a decision, what is stuck, and what can wait until morning.",
     quote: "A clear owner beats a long meeting.",
