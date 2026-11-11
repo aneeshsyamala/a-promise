@@ -379,3 +379,97 @@ document.querySelector("#message")?.addEventListener("submit", (event) => {
   event.currentTarget.querySelector("button").textContent = "Sent";
 });
 
+const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const cover = document.createElement("div");
+cover.className = "page-cover";
+if (!reduceMotion) document.body.append(cover);
+
+if (!reduceMotion) {
+  document.documentElement.classList.add("is-motion");
+
+  const maskWords = (root) => {
+    const nodes = [];
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+      acceptNode(node) {
+        if (!node.textContent.trim()) return NodeFilter.FILTER_REJECT;
+        if (node.parentElement.closest(".place-line, .slot, .places, .w-word, svg")) return NodeFilter.FILTER_REJECT;
+        return NodeFilter.FILTER_ACCEPT;
+      }
+    });
+    while (walker.nextNode()) nodes.push(walker.currentNode);
+    let count = 0;
+    nodes.forEach((node) => {
+      const frag = document.createDocumentFragment();
+      node.textContent.split(/(\s+)/).forEach((part) => {
+        if (!part) return;
+        if (!part.trim()) {
+          frag.append(part);
+          return;
+        }
+        const mask = document.createElement("span");
+        mask.className = "w-mask";
+        const word = document.createElement("span");
+        word.className = "w-word";
+        word.style.setProperty("--i", String(count++));
+        word.textContent = part;
+        mask.append(word);
+        frag.append(mask);
+      });
+      node.parentNode.replaceChild(frag, node);
+    });
+    root.querySelectorAll(".place-line").forEach((line) => {
+      line.classList.add("line-rise");
+      line.style.setProperty("--i", String(count++));
+    });
+    root.classList.add("w-title");
+  };
+
+  document.querySelectorAll("h1, h2").forEach((heading) => {
+    if (heading.closest("header")) return;
+    maskWords(heading);
+  });
+
+  document.querySelectorAll(".card, .quotes blockquote, .j-card, .journal .row, .svc, .person").forEach((item) => {
+    item.classList.add("rise");
+  });
+
+  const seen = new Set();
+  const reveal = (el) => {
+    if (seen.has(el)) return;
+    seen.add(el);
+    el.classList.add(el.classList.contains("rise") ? "is-in" : "w-in");
+  };
+  const motionObserver = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (!entry.isIntersecting) return;
+      reveal(entry.target);
+      motionObserver.unobserve(entry.target);
+    });
+  }, { threshold: 0.2, rootMargin: "0px 0px -6% 0px" });
+
+  requestAnimationFrame(() => {
+    cover.classList.add("is-out");
+    requestAnimationFrame(() => {
+      document.querySelectorAll(".w-title, .rise").forEach((el) => {
+        const rect = el.getBoundingClientRect();
+        if (rect.top < window.innerHeight * 0.92 && rect.bottom > 0) reveal(el);
+        else motionObserver.observe(el);
+      });
+    });
+  });
+
+  document.addEventListener("click", (event) => {
+    const link = event.target.closest("a");
+    if (!link || link.target === "_blank" || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return;
+    const href = link.getAttribute("href");
+    if (!href || href.startsWith("mailto:") || href.startsWith("tel:")) return;
+    const url = new URL(link.href, location.href);
+    if (url.origin !== location.origin) return;
+    if (url.pathname === location.pathname && url.hash) return;
+    event.preventDefault();
+    cover.classList.remove("is-out");
+    cover.classList.add("is-in");
+    window.setTimeout(() => { location.href = url.href; }, 680);
+  });
+}
+
